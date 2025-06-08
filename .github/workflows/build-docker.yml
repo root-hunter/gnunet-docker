@@ -34,7 +34,7 @@ jobs:
     if: success()
     strategy:
       matrix:
-        os_version: [25.04, 24.04]
+        os_version: [24.04]
     env:
       ARCH: linux/amd64
       RELEASE_TAG: ${{ github.event.inputs.release_tag }}
@@ -47,34 +47,44 @@ jobs:
       - name: Checkout GNUnet repo
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build GNUnet ${{ env.RELEASE_TAG }} - ${{ env.BUILD_NAME }}
+      - name: Clone GNUnet
         run: |
-          docker buildx build \
-            --platform ${{ env.ARCH }} \
-            --file ${{ env.BUILDER_PATH }} \
-            --output type=local,dest=${{ env.OUT_DIR }} \
-            --build-arg OS_VERSION=${{ matrix.os_version }} \
-            --build-arg REPO_BRANCH=${{ env.REPO_BRANCH }} \
-            .
-      - name: Upload .deb to release - ${{ env.BUILD_NAME }}
+          apt update && apt install -y git
+          git clone --branch ${{ env.REPO_BRANCH }} git://git.gnunet.org/gnunet.git
+      - name: Install GNUnet deps
         run: |
-          mv ${{ env.OUT_DIR }}/gnunet.deb ${{ env.OUT_DIR }}/${{ env.BUILD_NAME }}.deb
-          gh release upload ${{ env.RELEASE_TAG }} ${{ env.OUT_DIR }}/${{ env.BUILD_NAME }}.deb --clobber
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-
+          apt update && apt install -y \
+          autoconf automake libtool \
+          meson gettext recutils \
+          build-essential \
+          libltdl-dev \
+          libgcrypt20-dev libidn2-0-dev \
+          libmicrohttpd-dev libunistring-dev \
+          libjansson-dev libcurl4-gnutls-dev \
+          libgnutls28-dev libgmp-dev \
+          texinfo texlive texlive-fonts-recommended \
+          texlive-lang-english texlive-latex-base \
+          make pkgconf zlib1g-dev \
+          iptables libsqlite3-dev \
+          libextractor-dev \
+          libnss3-dev \
+          libopus-dev libogg-dev \
+          libpulse-dev libbluetooth-dev \
+          libsodium-dev \
+          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+          perl
+      - name: Build GNUnet
+        run: |
+          cd gnunet \
+          ./bootstrap && \
+          meson setup -Dprefix=/usr/local build && \
+          meson compile -C build
   ubuntu-arm64:
     needs: create-release
     if: success()
     strategy:
       matrix:
-        os_version: [25.04, 24.04]
+        os_version: [24.04]
     env:
       ARCH: linux/arm64
       RELEASE_TAG: ${{ github.event.inputs.release_tag }}

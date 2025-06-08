@@ -11,7 +11,6 @@ on:
         description: 'Release tag'
         required: true
         default: 'v0.24.2.0'
-
 jobs:
   create-release:
     env:
@@ -59,7 +58,7 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build GNUnet ${{ env.RELEASE_TAG }} \(${{ env.BUILD_NAME }}\)
+      - name: Build GNUnet ${{ env.RELEASE_TAG }} - ${{ env.BUILD_NAME }}
         run: |
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
@@ -68,7 +67,7 @@ jobs:
             --build-arg OS_VERSION=${{ matrix.os_version }} \
             --build-arg REPO_BRANCH=${{ env.REPO_BRANCH }} \
             .
-      - name: Upload .deb to release (${{ env.BUILD_NAME }})
+      - name: Upload .deb to release - ${{ env.BUILD_NAME }}
         run: |
           mv ${{ env.OUT_DIR }}/gnunet.deb ${{ env.OUT_DIR }}/${{ env.BUILD_NAME }}.deb
           gh release upload ${{ env.RELEASE_TAG }} ${{ env.OUT_DIR }}/${{ env.BUILD_NAME }}.deb --clobber

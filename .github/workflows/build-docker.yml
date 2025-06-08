@@ -1,4 +1,4 @@
-name: Build GNUnet multi-arch and create .deb
+name: Build
 
 on:
   workflow_dispatch:

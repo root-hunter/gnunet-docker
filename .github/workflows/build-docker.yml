@@ -34,9 +34,7 @@ jobs:
               cd gnunet &&
               ./bootstrap &&
               meson setup -Dprefix=/usr/local build &&
-              meson compile -C build &&
-              echo 'dummy control file' > deb/DEBIAN/control &&
-              dpkg-deb --build deb ../gnunet_${{ matrix.arch }}.deb
+              meson compile -C build
             "
       - name: Upload .deb package for ${{ matrix.arch }}
         uses: actions/upload-artifact@v4

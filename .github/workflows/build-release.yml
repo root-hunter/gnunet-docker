@@ -8,36 +8,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-ubuntu:
+  clone:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
 
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build GNUnet in Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ubuntu:${{ matrix.arch }} bash -c "
-            apt update &&
-            apt install -y git autoconf automake libtool meson gettext recutils build-essential \
-              libltdl-dev libgcrypt20-dev libidn2-0-dev libmicrohttpd-dev libunistring-dev libjansson-dev \
-              libcurl4-gnutls-dev libgnutls28-dev libgmp-dev texinfo texlive texlive-fonts-recommended \
-              texlive-lang-english texlive-latex-base make pkgconf zlib1g-dev iptables libsqlite3-dev \
-              libextractor-dev libnss3-dev libopus-dev libogg-dev libpulse-dev libbluetooth-dev libsodium-dev \
-              libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev perl dpkg-dev &&
-            ./bootstrap &&
-            meson setup -Dprefix=/usr/local build &&
-            meson compile -C build &&
-            # qui crei il pacchetto deb
-            mkdir -p deb/DEBIAN &&
-            echo "Package: gnunet
-
       - name: 🧰 Install dependencies
         run: |
           sudo apt update
@@ -45,6 +19,27 @@ jobs:
       - name: 📦 Clone GNUnet source
         run: |
           git clone git://git.gnunet.org/gnunet.git
+      
+      - name: 📤 Upload source as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gnunet-source
+          path: gnunet
+
+  build-ubuntu-x86:
+    needs: clone
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 📥 Download source from artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: gnunet-source
+          path: gnunet
+
       - name: 🧰 Install GNUnet build dependencies
         run: |
           sudo apt update

@@ -21,13 +21,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0
       - name: Create GitHub Release (if not exists)
         run: |
             gh release create ${{ env.RELEASE_TAG }} \
               --title "GNUnet ${{ env.RELEASE_TAG }}" \
-              --notes "Build from branch: ${{ env.REPO_BRANCH }}" \
-              --verify-tag
+              --notes "Build from branch: ${{ env.REPO_BRANCH }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
   build-ubuntu:

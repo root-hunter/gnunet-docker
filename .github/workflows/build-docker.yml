@@ -75,9 +75,9 @@ jobs:
           perl
       - name: Build GNUnet
         run: |
-          cd gnunet \
-          ./bootstrap && \
-          meson setup -Dprefix=/usr/local build && \
+          cd gnunet
+          ./bootstrap
+          meson setup -Dprefix=/usr/local build
           meson compile -C build
   ubuntu-arm64:
     needs: create-release

@@ -39,12 +39,14 @@ jobs:
       - name: Upload .deb package for ${{ matrix.arch }}/${{ matrix.os }}
         uses: actions/upload-artifact@v4
         with:
-          name: gnunet-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}-deb
+          name: gnunet-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
           path: out/${{ matrix.arch }}/gnunet.deb
 
   release:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event.release.tag_name }}
     if: github.event_name == 'release'
     steps:
       - name: Download all build artifacts
@@ -56,9 +58,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./out/amd64/gnunet.deb
-          asset_name: gnunet-${{ github.event.release.tag_name }}-amd64.deb
+          asset_path: ./out/gnunet-${{ env.VERSION }}-ubuntu-latest-amd64/gnunet.deb
+          asset_name: gnunet-${{ env.VERSION }}-amd64.deb
           asset_content_type: application/vnd.debian.binary-package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          

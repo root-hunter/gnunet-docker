@@ -1,9 +1,10 @@
 ARG OS_VERSION=latest
-
-FROM ubuntu:${OS_VERSION}
 ARG BRANCH=main
 
+FROM ubuntu:${OS_VERSION}
+
 ENV DEBIAN_FRONTEND=noninteractive
+ENV BRANCH=${BRANCH}
 
 WORKDIR /opt
 

@@ -9,11 +9,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        arch: [amd64, arm64]
-        exclude:
-          - os: ubuntu-latest
-            arch: arm64
+        #arch: [amd64, arm64]
+        arch: [amd64]
+        os: [ubuntu-latest, ubuntu-22.04]
     env:
       VERSION: ${{ github.event.release.tag_name }}
     runs-on: ubuntu-latest
@@ -37,7 +35,7 @@ jobs:
       - name: Upload .deb package for ${{ matrix.arch }}/${{ matrix.os }}
         uses: actions/upload-artifact@v4
         with:
-          name: gnunet-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
+          name: gnunet-${{ env.VERSION }}-${{ matrix.arch }}-${{ matrix.os }}
           path: out/${{ matrix.arch }}/gnunet.deb
 
   release:
@@ -45,6 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ github.event.release.tag_name }}
+      GITHUB_TOKEN: ${{ secrets.GH_PAT }}
     if: github.event_name == 'release'
     steps:
       - name: Download all build artifacts
@@ -56,8 +55,14 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./out/gnunet-${{ env.VERSION }}-ubuntu-latest-amd64/gnunet.deb
-          asset_name: gnunet-${{ env.VERSION }}-amd64.deb
+          asset_path: ./out/gnunet-${{ env.VERSION }}-amd64-ubuntu-latest/gnunet.deb
+          asset_name: gnunet-${{ env.VERSION }}-amd64-ubuntu-latest.deb
           asset_content_type: application/vnd.debian.binary-package
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Upload amd64 .deb to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./out/gnunet-${{ env.VERSION }}-amd64-ubuntu-22.04/gnunet.deb
+          asset_name: gnunet-${{ env.VERSION }}-amd64-ubuntu-22.04.deb
+          asset_content_type: application/vnd.debian.binary-package

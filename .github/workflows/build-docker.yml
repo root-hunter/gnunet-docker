@@ -7,14 +7,10 @@ on:
         description: 'Branch Git da usare per il build'
         required: true
         default: 'v0.24.2'
-      release_tag:
-        description: 'Release tag'
-        required: true
-        default: 'v0.24.2.0'
 jobs:
   create-release:
     env:
-      RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-${{ github.run_id }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'v0.24.2' }}
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +33,7 @@ jobs:
         os_version: [24.04]
     env:
       ARCH: linux/amd64
-      RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-${{ github.run_id }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'main' }}
       OUT_DIR: out/ubuntu/amd64
       BUILDER_PATH: builders/Dockerfile.ubuntu
@@ -87,7 +83,7 @@ jobs:
         os_version: [24.04]
     env:
       ARCH: linux/arm64
-      RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-${{ github.run_id }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'main' }}
       OUT_DIR: out/ubuntu/arm64
       BUILDER_PATH: builders/Dockerfile.ubuntu

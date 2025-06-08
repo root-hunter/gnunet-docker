@@ -8,10 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  clone:
+  build-ubuntu-x86:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
       - name: 🧰 Install dependencies
         run: |
           sudo apt update
@@ -19,27 +22,6 @@ jobs:
       - name: 📦 Clone GNUnet source
         run: |
           git clone git://git.gnunet.org/gnunet.git
-      
-      - name: 📤 Upload source as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gnunet-source
-          path: gnunet
-
-  build-ubuntu-x86:
-    needs: clone
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 📥 Download source from artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: gnunet-source
-          path: gnunet
-
       - name: 🧰 Install GNUnet build dependencies
         run: |
           sudo apt update

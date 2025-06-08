@@ -1,0 +1,9 @@
+services:
+  ubuntu:
+    container_name: ubuntu
+    tty: true
+    stdin_open: true
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    

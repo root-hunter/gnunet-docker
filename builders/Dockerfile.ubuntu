@@ -1,6 +1,7 @@
-ARG VERSION=latest
+ARG OS_VERSION=latest
+ARG BRANCH=main
 
-FROM ubuntu:${VERSION}
+FROM ubuntu:${OS_VERSION}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,7 +10,7 @@ WORKDIR /opt
 RUN apt update && apt install -y git
 
 # Clone GNUnet
-RUN git clone git://git.gnunet.org/gnunet.git
+RUN git clone --branch ${BRANCH} git://git.gnunet.org/gnunet.git
 
 RUN apt update && apt install -y \
     autoconf automake libtool \

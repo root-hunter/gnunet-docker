@@ -4,6 +4,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch Git da usare per il build'
+        required: true
+        default: 'main'
 
 jobs:
   build-ubuntu:
@@ -21,6 +26,7 @@ jobs:
       OUT_DIR: out/ubuntu/${{ matrix.arch }}
       BUILDER_PATH: builders/Dockerfile.ubuntu
       BUILD_NAME: gnunet-${{ github.event.release.tag_name }}-ubuntu-${{ matrix.version }}-${{ matrix.arch }}
+      BRANCH: ${{ github.event.inputs.branch || 'main' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout GNUnet repo
@@ -38,7 +44,8 @@ jobs:
             --platform linux/${{ matrix.arch }} \
             --file ${{ env.BUILDER_PATH }} \
             --output type=local,dest=${{ env.OUT_DIR }} \
-            --build-arg VERSION=${{ matrix.version }} \
+            --build-arg OS_VERSION=${{ matrix.version }} \
+            --build-arg BRANCH=${{ env.BRANCH }} \
             .
       - name: Upload .deb to release (${{ env.BUILD_NAME }})
         uses: actions/upload-release-asset@v1

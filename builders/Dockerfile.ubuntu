@@ -5,7 +5,7 @@ WORKDIR /opt
 RUN apt update && apt install -y git
 
 # Clone GNUnet
-RUN git clone --depth=1 git://git.gnunet.org/gnunet.git
+RUN git clone git://git.gnunet.org/gnunet.git
 
 RUN apt update && apt install -y \
     autoconf automake libtool \
@@ -41,4 +41,4 @@ RUN mkdir -p /out && \
     meson install -C build --destdir=$(pwd)/debian/gnunet-package && \
     mkdir -p debian/gnunet-package/DEBIAN && \
     echo "Package: gnunet\nVersion: 0.24.0\nArchitecture: $(dpkg --print-architecture)\nMaintainer: Your Name <you@example.com>\nDescription: GNUnet built from source\n" > debian/gnunet-package/DEBIAN/control && \
-    dpkg-deb --build debian/gnunet-package /out/gnunet.deb
+    dpkg-deb --build debian/gnunet-package /gnunet.deb

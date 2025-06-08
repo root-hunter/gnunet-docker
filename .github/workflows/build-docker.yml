@@ -3,14 +3,17 @@ name: Build GNUnet multi-arch and create .deb
 on:
   push:
     branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
+        os: [ubuntu-latest]
         arch: [amd64, arm64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout GNUnet repo
         uses: actions/checkout@v4
@@ -25,11 +28,25 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
-            --file builders/Dockerfile.ubuntu \
+            --file builders/Dockerfile.${{ matrix.os }} \
             --output type=local,dest=out/${{ matrix.arch }} \
             .
-      - name: Upload .deb package for ${{ matrix.arch }}
+      - name: Upload .deb package for ${{ matrix.os }}/${{ matrix.arch }}
         uses: actions/upload-artifact@v4
         with:
-          name: gnunet-ubuntu-${{ matrix.arch }}-deb
+          name: gnunet-${{ matrix.os }}-${{ matrix.arch }}-deb
           path: out/${{ matrix.arch }}/gnunet.deb
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            **/gnunet.deb

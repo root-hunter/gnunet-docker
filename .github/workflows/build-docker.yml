@@ -27,7 +27,7 @@ jobs:
             gh release create ${{ env.RELEASE_TAG }} \
               --title "GNUnet ${{ env.RELEASE_TAG }}" \
               --notes "Build from branch: ${{ env.REPO_BRANCH }}" \
-              --verify-tag || echo "Release already exists"
+              --verify-tag
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
   build-ubuntu:

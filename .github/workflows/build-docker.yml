@@ -9,9 +9,12 @@ jobs:
   build-ubuntu:
     strategy:
       matrix:
-        #arch: [amd64, arm64]
-        arch: [amd64]
-        version: [latest, 24.04]
+        arch: [amd64, arm64]
+        #arch: [amd64]
+        version: [25.04, 24.04]
+        exclude:
+          - arch: arm64
+            version: 25.04
     env:
       VERSION: ${{ github.event.release.tag_name }}
       UPLOAD_URL: ${{ github.event.release.upload_url }}

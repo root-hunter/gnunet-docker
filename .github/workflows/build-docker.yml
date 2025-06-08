@@ -29,14 +29,14 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build GNUnet for ${{ matrix.arch }}
+      - name: Build GNUnet ${{ env.VERSION }} for ${{ matrix.arch }}/${{ matrix.os }}
         run: |
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
             --file builders/Dockerfile.${{ matrix.os }} \
             --output type=local,dest=out/${{ matrix.arch }} \
             .
-      - name: Upload .deb package for ${{ matrix.os }}/${{ matrix.arch }}
+      - name: Upload .deb package for ${{ matrix.arch }}/${{ matrix.os }}
         uses: actions/upload-artifact@v4
         with:
           name: gnunet-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}-deb
@@ -52,9 +52,12 @@ jobs:
         with:
           path: ./out
 
-      - name: Upload .deb files to GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload amd64 .deb to release
+        uses: actions/upload-release-asset@v1
         with:
-          files: out/**/*.deb
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./out/amd64/gnunet.deb
+          asset_name: gnunet-${{ github.event.release.tag_name }}-amd64.deb
+          asset_content_type: application/vnd.debian.binary-package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

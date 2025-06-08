@@ -15,7 +15,7 @@ jobs:
   create-release:
     env:
       RELEASE_TAG: ${{ github.event.inputs.release_tag }}
-      REPO_BRANCH: ${{ github.event.inputs.branch || 'v0.20.0' }}
+      REPO_BRANCH: ${{ github.event.inputs.branch || 'v0.24.2' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -29,24 +29,19 @@ jobs:
               --notes "Build from branch: ${{ env.REPO_BRANCH }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-  ubuntu:
+  ubuntu-amd64:
     needs: create-release
     if: success()
     strategy:
       matrix:
-        arch: [amd64, arm64]
-        #arch: [amd64]
         os_version: [25.04, 24.04]
-        exclude:
-          - arch: arm64
-            os_version: 25.04
     env:
+      ARCH: linux/amd64
       RELEASE_TAG: ${{ github.event.inputs.release_tag }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'main' }}
-      UPLOAD_URL: ${{ github.event.release.upload_url }}
-      OUT_DIR: out/ubuntu/${{ matrix.arch }}
+      OUT_DIR: out/ubuntu/amd64
       BUILDER_PATH: builders/Dockerfile.ubuntu
-      BUILD_NAME: gnunet-${{ github.event.inputs.branch }}-ubuntu-${{ matrix.os_version }}-${{ matrix.arch }}
+      BUILD_NAME: gnunet-${{ github.event.inputs.branch }}-ubuntu-${{ matrix.os_version }}-amd64
     runs-on: ubuntu-latest
     steps:
       - name: Checkout GNUnet repo
@@ -61,7 +56,47 @@ jobs:
       - name: Build GNUnet ${{ env.RELEASE_TAG }} - ${{ env.BUILD_NAME }}
         run: |
           docker buildx build \
-            --platform linux/${{ matrix.arch }} \
+            --platform ${{ env.ARCH }} \
+            --file ${{ env.BUILDER_PATH }} \
+            --output type=local,dest=${{ env.OUT_DIR }} \
+            --build-arg OS_VERSION=${{ matrix.os_version }} \
+            --build-arg REPO_BRANCH=${{ env.REPO_BRANCH }} \
+            .
+      - name: Upload .deb to release - ${{ env.BUILD_NAME }}
+        run: |
+          mv ${{ env.OUT_DIR }}/gnunet.deb ${{ env.OUT_DIR }}/${{ env.BUILD_NAME }}.deb
+          gh release upload ${{ env.RELEASE_TAG }} ${{ env.OUT_DIR }}/${{ env.BUILD_NAME }}.deb --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+
+  ubuntu-arm64:
+    needs: create-release
+    if: success()
+    strategy:
+      matrix:
+        os_version: [25.04, 24.04]
+    env:
+      ARCH: linux/arm64
+      RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+      REPO_BRANCH: ${{ github.event.inputs.branch || 'main' }}
+      OUT_DIR: out/ubuntu/arm64
+      BUILDER_PATH: builders/Dockerfile.ubuntu
+      BUILD_NAME: gnunet-${{ github.event.inputs.branch }}-ubuntu-${{ matrix.os_version }}-arm64
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout GNUnet repo
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build GNUnet ${{ env.RELEASE_TAG }} - ${{ env.BUILD_NAME }}
+        run: |
+          docker buildx build \
+            --platform ${{ env.ARCH }} \
             --file ${{ env.BUILDER_PATH }} \
             --output type=local,dest=${{ env.OUT_DIR }} \
             --build-arg OS_VERSION=${{ matrix.os_version }} \

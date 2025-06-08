@@ -6,12 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-ubuntu:
     strategy:
       matrix:
         #arch: [amd64, arm64]
         arch: [amd64]
-        os: [ubuntu-latest, ubuntu-24.04]
+        version: [latest, 24.04]
     env:
       VERSION: ${{ github.event.release.tag_name }}
       GITHUB_TOKEN: ${{ secrets.GH_PAT }}
@@ -26,22 +26,23 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build GNUnet ${{ env.VERSION }} for ${{ matrix.arch }}/${{ matrix.os }}
+      - name: Build GNUnet ${{ env.VERSION }} for ${{ matrix.arch }}/${{ matrix.version }}
         run: |
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
-            --file builders/Dockerfile.${{ matrix.os }} \
+            --file builders/Dockerfile.ubuntu \
             --output type=local,dest=out/${{ matrix.arch }} \
+            --build-arg VERSION=${{ matrix.version }} \
             .
-      - name: Upload .deb package for ${{ matrix.arch }}/${{ matrix.os }}
+      - name: Upload .deb package for ${{ matrix.arch }}/${{ matrix.version }}
         uses: actions/upload-artifact@v4
         with:
-          name: gnunet-${{ env.VERSION }}-${{ matrix.arch }}-${{ matrix.os }}
+          name: gnunet-${{ env.VERSION }}-${{ matrix.arch }}-ubuntu-${{ matrix.version }}
           path: out/${{ matrix.arch }}/gnunet.deb
-      - name: Upload ${{ matrix.arch }}/${{ matrix.os }} .deb to release
+      - name: Upload ${{ matrix.arch }}/${{ matrix.version }} .deb to release
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: out/${{ matrix.arch }}/gnunet.deb
-          asset_name: gnunet-${{ env.VERSION }}-${{ matrix.arch }}-${{ matrix.os }}.deb
+          asset_name: gnunet-${{ env.VERSION }}-${{ matrix.arch }}-ubuntu-${{ matrix.version }}.deb
           asset_content_type: application/vnd.debian.binary-package

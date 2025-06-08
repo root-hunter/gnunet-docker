@@ -15,6 +15,10 @@ jobs:
     env:
       VERSION: ${{ github.event.release.tag_name }}
       GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+      UPLOAD_URL: ${{ github.event.release.upload_url }}
+      OUT_DIR: out/ubuntu/${{ matrix.arch }}
+      BUILDER_PATH: builders/Dockerfile.ubuntu
+      BUILD_NAME: gnunet-${{ github.event.release.tag_name }}-ubuntu-${{ matrix.version }}-${{ matrix.arch }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout GNUnet repo
@@ -26,23 +30,23 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build GNUnet ${{ env.VERSION }} for ${{ matrix.arch }}/${{ matrix.version }}
+      - name: Build GNUnet ${{ env.VERSION }} (${{ env.BUILD_NAME }})
         run: |
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
-            --file builders/Dockerfile.ubuntu \
-            --output type=local,dest=out/${{ matrix.arch }} \
+            --file ${{ env.BUILDER_PATH }} \
+            --output type=local,dest=${{ env.OUT_DIR }} \
             --build-arg VERSION=${{ matrix.version }} \
             .
-      - name: Upload .deb package for ${{ matrix.arch }}/${{ matrix.version }}
+      - name: Upload .deb package to artifact (${{ env.BUILD_NAME }})
         uses: actions/upload-artifact@v4
         with:
-          name: gnunet-${{ env.VERSION }}-${{ matrix.arch }}-ubuntu-${{ matrix.version }}
-          path: out/${{ matrix.arch }}/gnunet.deb
-      - name: Upload ${{ matrix.arch }}/${{ matrix.version }} .deb to release
+          name: ${{ env.BUILD_NAME }}
+          path: ${{ env.OUT_DIR }}/gnunet.deb
+      - name: Upload .deb to release (${{ env.BUILD_NAME }})
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: out/${{ matrix.arch }}/gnunet.deb
-          asset_name: gnunet-${{ env.VERSION }}-${{ matrix.arch }}-ubuntu-${{ matrix.version }}.deb
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: ${{ env.OUT_DIR }}/gnunet.deb
+          asset_name: ${{ env.BUILD_NAME }}.deb
           asset_content_type: application/vnd.debian.binary-package

@@ -38,9 +38,7 @@ RUN ./bootstrap && \
 # Create Debian package
 RUN mkdir -p /out && \
     mkdir -p debian && \
-    cd build && \
-    ninja install DESTDIR=$(pwd)/../debian/gnunet-package && \
-    cd .. && \
+    meson install -C build --destdir=$(pwd)/debian/gnunet-package && \
     mkdir -p debian/gnunet-package/DEBIAN && \
-    echo "Package: gnunet\nVersion: 0.21.0\nArchitecture: $(dpkg --print-architecture)\nMaintainer: Your Name <you@example.com>\nDescription: GNUnet built from source\n" > debian/gnunet-package/DEBIAN/control && \
+    echo "Package: gnunet\nVersion: 0.24.0\nArchitecture: $(dpkg --print-architecture)\nMaintainer: Your Name <you@example.com>\nDescription: GNUnet built from source\n" > debian/gnunet-package/DEBIAN/control && \
     dpkg-deb --build debian/gnunet-package /out/gnunet.deb

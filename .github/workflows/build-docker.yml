@@ -7,6 +7,7 @@ on:
     types: [published]
   workflow_dispatch:
 
+    
 jobs:
   build:
     strategy:
@@ -45,11 +46,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     steps:
-      - name: Download all artifacts
+      - name: Download all build artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: ./out
 
-      - name: Upload to GitHub Release
+      - name: Upload .deb files to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            **/gnunet.deb
+          files: out/**/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

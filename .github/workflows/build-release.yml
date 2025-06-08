@@ -1,0 +1,51 @@
+name: Build GNUnet
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🧰 Install GNUnet build dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git autoconf automake libtool \
+            meson gettext recutils build-essential \
+            libltdl-dev libgcrypt20-dev libidn2-0-dev \
+            libmicrohttpd-dev libunistring-dev libjansson-dev \
+            libcurl4-gnutls-dev libgnutls28-dev libgmp-dev \
+            texinfo texlive texlive-fonts-recommended \
+            texlive-lang-english texlive-latex-base \
+            make pkgconf zlib1g-dev iptables libsqlite3-dev \
+            libextractor-dev libnss3-dev libopus-dev libogg-dev \
+            libpulse-dev libbluetooth-dev libsodium-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+            perl
+
+      - name: 📦 Clone GNUnet source
+        run: |
+          git clone git://git.gnunet.org/gnunet.git
+          cd gnunet
+          ./bootstrap
+
+      - name: ⚙️ Configure and build with Meson
+        run: |
+          cd gnunet
+          meson setup -Dprefix=/usr/local build
+          meson compile -C build
+
+      - name: 📤 Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gnunet-build
+          path: gnunet/build/

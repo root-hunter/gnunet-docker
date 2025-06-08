@@ -6,11 +6,11 @@ on:
       branch:
         description: 'Branch Git da usare per il build'
         required: true
-        default: 'v0.20.0'
+        default: 'v0.24.2'
       release_tag:
         description: 'Release tag'
         required: true
-        default: 'v0.20.0.0'
+        default: 'v0.24.2.0'
 
 jobs:
   create-release:
@@ -19,6 +19,9 @@ jobs:
       REPO_BRANCH: ${{ github.event.inputs.branch || 'v0.20.0' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
       - name: Create GitHub Release (if not exists)
         run: |
             gh release create ${{ env.RELEASE_TAG }} \
@@ -29,6 +32,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
   build-ubuntu:
     needs: create-release
+    if: success()
     strategy:
       matrix:
         arch: [amd64, arm64]

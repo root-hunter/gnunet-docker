@@ -32,4 +32,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gnunet-${{ matrix.arch }}-deb
-          path: out/${{ matrix.arch }}/gnunet*.deb
+          path: out/${{ matrix.arch }}/out/gnunet*.deb

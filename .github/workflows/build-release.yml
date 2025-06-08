@@ -55,7 +55,9 @@ jobs:
             libpulse-dev libbluetooth-dev libsodium-dev \
             libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
             perl
-      - name: 📦 GNUnet Bootstrap
+      - name: 🛠️ Fix script permissions
+        run: chmod +x gnunet/bootstrap
+      - name: 🛠️ Bootstrap
         run: |
           cd gnunet
           ./bootstrap

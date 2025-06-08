@@ -30,7 +30,7 @@ jobs:
               --notes "Build from branch: ${{ env.REPO_BRANCH }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-  build-ubuntu:
+  ubuntu:
     needs: create-release
     if: success()
     strategy:

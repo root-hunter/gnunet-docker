@@ -49,11 +49,11 @@ jobs:
 
       - name: Clone GNUnet
         run: |
-          sudo apt update && apt install -y git
+          sudo apt update && sudo apt install -y git
           git clone --branch ${{ env.REPO_BRANCH }} git://git.gnunet.org/gnunet.git
       - name: Install GNUnet deps
         run: |
-          sudo apt update && apt install -y \
+          sudo apt update && sudo apt install -y \
           autoconf automake libtool \
           meson gettext recutils \
           build-essential \

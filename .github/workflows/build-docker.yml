@@ -36,7 +36,7 @@ jobs:
         os_version: [25.04, 24.04]
         exclude:
           - arch: arm64
-            version: 25.04
+            os_version: 25.04
     env:
       RELEASE_TAG: ${{ github.event.inputs.release_tag }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'main' }}

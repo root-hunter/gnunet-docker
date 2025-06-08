@@ -1,8 +1,6 @@
 name: Build GNUnet multi-arch and create .deb
 
 on:
-  # push:
-  #   branches: [main]
   release:
     types: [published]
   workflow_dispatch:

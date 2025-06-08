@@ -1,4 +1,4 @@
-# GNUnet Build & Release Automation
+# GNUnet Build & Release Automations
 
 This project provides **Docker environments**, **scripts**, and **GitHub Actions pipelines** to automate the building, testing, and releasing of [GNUnet](https://gnunet.org), the secure peer-to-peer networking framework.
 

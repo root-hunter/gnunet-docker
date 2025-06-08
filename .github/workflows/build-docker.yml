@@ -10,7 +10,7 @@ on:
 jobs:
   create-release:
     env:
-      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-${{ github.run_number }}
+      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-build${{ github.run_number }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'v0.24.2' }}
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +33,7 @@ jobs:
         os_version: [24.04]
     env:
       ARCH: linux/amd64
-      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-${{ github.run_number }}
+      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-build${{ github.run_number }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'main' }}
       OUT_DIR: out/ubuntu/amd64
       BUILDER_PATH: builders/Dockerfile.ubuntu
@@ -75,6 +75,16 @@ jobs:
           ./bootstrap
           meson setup -Dprefix=/usr/local build
           meson compile -C build
+      - name: Install checkinstall
+        run: sudo apt install -y checkinstall
+
+      - name: Create .deb package
+        run: |
+          cd gnunet
+          sudo checkinstall --default --pkgname=gnunet --pkgversion="${{ env.RELEASE_TAG }}" \
+            --pkglicense=GPL --pkggroup=net --maintainer=you@example.com \
+            --install=no --fstrans=yes \
+            meson install -C build
   ubuntu-arm64:
     needs: create-release
     if: success()
@@ -83,7 +93,7 @@ jobs:
         os_version: [24.04]
     env:
       ARCH: linux/arm64
-      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-${{ github.run_number }}
+      RELEASE_TAG: ${{ github.event.inputs.branch || 'v0.24.2' }}-build${{ github.run_number }}
       REPO_BRANCH: ${{ github.event.inputs.branch || 'main' }}
       OUT_DIR: out/ubuntu/arm64
       BUILDER_PATH: builders/Dockerfile.ubuntu
